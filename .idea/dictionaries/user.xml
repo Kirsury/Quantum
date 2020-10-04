@@ -5,6 +5,7 @@
       <w>cnot</w>
       <w>csvfile</w>
       <w>numvars</w>
+      <w>qbit</w>
       <w>revlib</w>
       <w>toffoli</w>
     </words>
