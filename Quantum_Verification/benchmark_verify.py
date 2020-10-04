@@ -20,7 +20,7 @@ def read_revlib(filename):
 def get_version(file_data):
     """
     :param file_data:文件数据(列表)
-    :return:版本号version(char)
+    :return:版本号version(char型)
     """
     version = ''
     for m in file_data:  # 遍历文本的每一行
@@ -38,7 +38,7 @@ def get_version(file_data):
 def get_numvars(file_data):
     """
     :param file_data:文件数据(列表)
-    :return:变量数量numvars(int)
+    :return:变量数量numvars(int型)
     """
     num = 0
     for m in file_data:  # 遍历文本的每一行
