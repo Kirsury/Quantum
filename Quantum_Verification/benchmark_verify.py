@@ -2,11 +2,25 @@ import numpy as np
 import csv
 
 
+# 读取电路文件，提取信息
+def read_revlib(filename):
+    """
+    :param filename:benchmark文件路径
+    :return:文件中的数据(列表)
+    """
+    data = []
+    with open(filename, 'rt') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            data.append(row)
+    return data
+
+
 # 获取版本号
 def get_version(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:版本号version(char)
     """
     version = ''
     for m in file_data:  # 遍历文本的每一行
@@ -23,8 +37,8 @@ def get_version(file_data):
 # 获取变量数量
 def get_numvars(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:变量数量numvars(int)
     """
     num = 0
     for m in file_data:  # 遍历文本的每一行
@@ -40,8 +54,8 @@ def get_numvars(file_data):
 # 获取变量列表
 def get_variables(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:变量variables(列表)
     """
     index = []
     for m in file_data:  # 遍历文本的每一行
@@ -58,8 +72,8 @@ def get_variables(file_data):
 # 获取输入端列表
 def get_inputs(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:输入端inputs(列表)
     """
     in_put = []
     for m in file_data:  # 遍历文本的每一行
@@ -76,8 +90,8 @@ def get_inputs(file_data):
 # 获取输出端列表
 def get_outputs(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:输出端outputs(列表)
     """
     out_put = []
     for m in file_data:  # 遍历文本的每一行
@@ -94,8 +108,8 @@ def get_outputs(file_data):
 # 获取常量输入列表
 def get_constants(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:常量输入constants(列表)
     """
     a = []
     const = []
@@ -113,8 +127,8 @@ def get_constants(file_data):
 # 获取垃圾输出列表
 def get_garbage(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:垃圾输出garbage(列表)
     """
     garb = []
     a = []
@@ -132,26 +146,26 @@ def get_garbage(file_data):
 # 获取门列表
 def get_gates(file_data):
     """
-    :param file_data:
-    :return:
+    :param file_data:文件数据(列表)
+    :return:量子门gates(列表)
     """
-    gate = []
+    gates = []
     for m in file_data:  # 遍历文本的每一行
         a = " ".join(m)
         if a[0] != '.' and a[0] != '#':  # 排除注释及其他信息
             gate_str = a[:]
             _gate = gate_str.split()
-            gate.append(_gate)  # 用列表存储每一行
+            gates.append(_gate)  # 用列表存储每一行
         elif a[0:4] == '.end':  # 检测到end
             break  # 退出
-    return gate
+    return gates
 
 
 # 将变量列表与从0开始的数字进行匹配，存到字典中
 def create_dict(variables):
     """
-    :param variables:
-    :return:
+    :param variables:变量variables(列表)
+    :return:匹配字典dict0
     """
     x = 0
     # 将变量列表与从0开始的数字进行匹配，存到字典中
@@ -162,26 +176,12 @@ def create_dict(variables):
     return dict0
 
 
-# 读取电路文件，提取信息
-def read_revlib(filename):
-    """
-    :param filename:
-    :return:
-    """
-    data = []
-    with open(filename, 'rt') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            data.append(row)
-    return data
-
-
 # not
 def not_gate(tar, result):
     """
-    :param tar:
-    :param result:
-    :return:
+    :param tar:目标位所在线序号
+    :param result:经过not门处理后的结果
+    :return:None
     """
     if result[tar] == 1:
         result[tar] = 0
@@ -192,10 +192,10 @@ def not_gate(tar, result):
 # swap
 def swap_gate(tar1, tar2, result):
     """
-    :param tar1:
-    :param tar2:
-    :param result:
-    :return:
+    :param tar1:目标位1所在线序号
+    :param tar2:目标位2所在线序号
+    :param result:经过swap门处理后的结果
+    :return:None
     """
     in_1 = result[tar1]
     in_2 = result[tar2]
@@ -206,10 +206,10 @@ def swap_gate(tar1, tar2, result):
 # control-not
 def c_not_gate(ctr, tar, result):
     """
-    :param ctr:
-    :param tar:
-    :param result:
-    :return:
+    :param ctr:控制位所在线序号
+    :param tar:目标位所在线序号
+    :param result:经过cnot门处理后的结果
+    :return:None
     """
     if result[ctr] == 1:
         if result[tar] == 0:
@@ -221,11 +221,11 @@ def c_not_gate(ctr, tar, result):
 # double—control-toffoli
 def cc_not_gate(ctr1, ctr2, tar, result):
     """
-    :param ctr1:
-    :param ctr2:
-    :param tar:
-    :param result:
-    :return:
+    :param ctr1:控制位1所在线序号
+    :param ctr2:控制位2所在线序号
+    :param tar:目标位所在线序号
+    :param result:经过ccnot门处理后的结果
+    :return:None
     """
     if result[ctr1] == 1 and result[ctr2] == 1:
         if result[tar] == 0:
@@ -237,12 +237,12 @@ def cc_not_gate(ctr1, ctr2, tar, result):
 # three—control-toffoli
 def ccc_not_gate(ctr1, ctr2, ctr3, tar, result):
     """
-    :param ctr1:
-    :param ctr2:
-    :param ctr3:
-    :param tar:
-    :param result:
-    :return:none
+    :param ctr1:控制位1所在线序号
+    :param ctr2:控制位2所在线序号
+    :param ctr3:控制位3所在线序号
+    :param tar:目标位所在线序号
+    :param result:经过cccnot门处理后的结果
+    :return:None
     """
     if result[ctr1] == 1 and result[ctr2] == 1 and result[ctr3] == 1:
         if result[tar] == 0:
@@ -254,11 +254,11 @@ def ccc_not_gate(ctr1, ctr2, ctr3, tar, result):
 # control-swap
 def c_swap(ctr, tar1, tar2, result):
     """
-    :param ctr:
-    :param tar1:
-    :param tar2:
-    :param result:
-    :return:
+    :param ctr:控制位所在线序号
+    :param tar1:目标位1所在线序号
+    :param tar2:目标位2所在线序号
+    :param result:经过cswap门处理后的结果
+    :return:None
     """
     if result[ctr] == 1:
         in_1 = result[tar1]
@@ -271,9 +271,9 @@ def c_swap(ctr, tar1, tar2, result):
 def run(circuit, result, dict0):
     """
     :param circuit: 电路列表
-    :param result: 更新矩阵，用于存放每个门的输入和输出
+    :param result: 更新数组，用于每个门的输入和输出
     :param dict0: 匹配字典
-    :return:
+    :return:None
     """
     for i in circuit:
         _Gate = i[0][1]
@@ -288,8 +288,8 @@ def run(circuit, result, dict0):
 # 创建真值表输入端（矩阵表示）
 def in_matrix(number):
     """
-    :param number:
-    :return:
+    :param number:变量数量numvars
+    :return:真值表输入端(二维数组)
     """
     in_table = np.empty([0, number], dtype=int)
     if number == 3:
@@ -316,8 +316,8 @@ def in_matrix(number):
 # 导入benchmark电路文件，返回该电路真值表输出端
 def process(file):
     """
-    :param file:
-    :return:
+    :param file:benchmark文件路径
+    :return:真值表输出端(二维数组)或0(空电路)
     """
     data = read_revlib(file)
     num = get_numvars(data)
@@ -368,9 +368,9 @@ def process(file):
 # 验证真值表输出端是否相等
 def matrix_equal(a, b):
     """
-    :param a:
-    :param b:
-    :return:
+    :param a:真值表输出端1(二维数组)
+    :param b:真值表输出端2(二维数组)
+    :return:None
     """
     if np.array_equal(a, b):
         print("电路等价")
